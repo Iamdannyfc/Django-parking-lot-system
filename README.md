@@ -6,7 +6,7 @@ A parking lot is an area where cars can be parked for a certain amount of time. 
 For this problem, we have to design the next-generation parking lot system that can manage a parking lot without any human intervention 
 
 ## Requirements
-Create a djangob api app for the parking lot system with the following requirements.
+Create a django api app for the parking lot system with the following requirements.
 
 The functions that the parking lot system can do:
 - Create the parking lot.
