@@ -18,6 +18,6 @@ The functions that the parking lot system can do:
 
 ### For the Activity Diagram [Use this link](https://drive.google.com/) to view
 
-### For the Sequence Diagram  [Use this link]([https://drive.google.com/](https://drive.google.com/drive/folders/1dUWgmL9IASKAqQo_hWxfUt1g7QulVkgz)) to view
+### For the Sequence Diagram  [Use this link](https://drive.google.com/drive/folders/1dUWgmL9IASKAqQo_hWxfUt1g7QulVkgz).
 
-### For the Activity Diagram  [Use this link]([https://drive.google.com/](https://drive.google.com/drive/folders/1dV4tAVwPgO5O13iO97bdIFJsrIjknlt5)).
+### For the Activity Diagram  [Use this link](https://drive.google.com/drive/folders/1dV4tAVwPgO5O13iO97bdIFJsrIjknlt5).
