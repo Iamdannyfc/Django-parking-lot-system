@@ -8,9 +8,14 @@ For this problem, we have to design the next-generation parking lot system that 
 ## Requirements
 Create a django api app for the parking lot system with the following requirements.
 
-The functions that the parking lot system can do:
-- Create the parking lot.
-- Add floors to the parking lot [Continue](https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8) from here to see the project details
+## Features
+
+- Manage multiple parking lots.
+- Each parking lot can have multiple floors.
+- Each floor can have multiple parking slots.
+- Track vehicles parked in each slot.
+-
+- This Django project was an upgrade of the python application found [here](https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8) from here to see the project details
 
 ## UML Diagrams
 
