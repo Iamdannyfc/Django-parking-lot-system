@@ -14,8 +14,7 @@ Create a django api app for the parking lot system with the following requiremen
 - Each parking lot can have multiple floors.
 - Each floor can have multiple parking slots.
 - Track vehicles parked in each slot.
--
-- This Django project was an upgrade of the python application found [here](https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8) from here to see the project details
+- This Django project was an upgrade of the python application described [here](https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8), it is an upgrade asked to be done at The Internship using Django app and drf.
 
 ## UML Diagrams
 
