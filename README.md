@@ -18,7 +18,7 @@ Create a django api app for the parking lot system with the following requiremen
 
 ## UML Diagrams
 
-### For the ERD Diagram [Use this link](https://drive.google.com/) to view
+### For the ERD Diagram [Use this link](https://drive.google.com/drive/folders/1dSxxI0R7nl1ewDsNSs3z_JmED7Ynkibo) to view
 
 ### For the Sequence Diagram  [Use this link](https://drive.google.com/drive/folders/1dUWgmL9IASKAqQo_hWxfUt1g7QulVkgz).
 
