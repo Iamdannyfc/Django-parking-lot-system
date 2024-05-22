@@ -49,6 +49,33 @@ class ParkVehicleView(APIView):
             available_slot.save()
             return Response({'message': 'Vehicle parked successfully', 'slot_number': available_slot.number, 'floor': available_slot.floor.number}, status=status.HTTP_200_OK)
         else:
-            return Response(vehicle_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'An error occured'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UnparkVehicleView(APIView):
+    def post(self, request):
+        registration_number = request.data.get('registration_number')
+        
+        if not registration_number:
+            return Response({'error': 'Registration number is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            vehicle = Vehicle.objects.get(registration_number=registration_number)
+        except:
+            return Response({'error': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            slot = ParkingSlot.objects.get(vehicle=vehicle)
+        except:
+            return Response({'error': 'Parking slot for this vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Unpark the vehicle
+        slot.vehicle = None
+        slot.is_available = True
+        slot.save()
+        vehicle.delete()
+
+        return Response({'message': 'Vehicle unparked successfully'}, status=status.HTTP_200_OK)
 
 
