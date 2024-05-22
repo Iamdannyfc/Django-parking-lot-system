@@ -4,4 +4,5 @@ from .views import ParkingLotCreateView, park_vehicle
 urlpatterns = [
     path('create-parking-lot/', ParkingLotCreateView.as_view(), name='create-parking-lot'),
     path('park-vehicle/', ParkVehicleView.as_view(), name='park-vehicle'),
+    path('unpark-vehicle/', UnparkVehicleView.as_view(), name='unpark-vehicle'),
 ]
