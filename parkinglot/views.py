@@ -5,27 +5,29 @@ from rest_framework.response import Response
 from .models import ParkingSlot, Vehicle
 from .serializers import VehicleSerializer,ParkingLotSerializer
 
-
+#You have to create parking
 class ParkingLotCreateView(APIView):
     def post(self, request):
-        parking_lot = ParkingLotSerializer(data=request.data).save()
-    
-    
-    # Create Floors and Parking Slots based on max_floors and max_slots
-        max_floors = parking_lot.max_floors
-        max_slots = parking_lot.max_slots
-        
-        for floor_number in range(1, max_floors + 1):
-            floor = Floor.objects.create(number=floor_number, parking_lot=parking_lot)
-            for slot_number in range(1, max_slots + 1):
-                ParkingSlot.objects.create(number=slot_number, is_available=True, floor=floor)
-         return Response({'message': parking_lot.data }, status=status.HTTP_200_OK)
-     
+        serializer = ParkingLotSerializer(data=request.data)
+        if serializer.is_valid():
+            parking_lot = serializer.save()
+            
+            # Create Floors and Parking Slots based on max_floors and max_slots
+            max_floors = parking_lot.max_floors
+            max_slots = parking_lot.max_slots
+            
+            for floor_number in range(1, max_floors + 1):
+                floor = Floor.objects.create(number=floor_number, parking_lot=parking_lot)
+                for slot_number in range(1, max_slots + 1):
+                    ParkingSlot.objects.create(number=slot_number, is_available=True, floor=floor)
+            
+            return Response({'message': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
     
     
     
 
-
+#wait, lemme work on parking 
 class ParkVehicleView(APIView):
     def post(self, request):
         vehicle_data = request.data
