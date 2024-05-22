@@ -47,7 +47,7 @@ class ParkVehicleView(APIView):
             available_slot.vehicle = vehicle
             available_slot.is_available = False
             available_slot.save()
-            return Response({'message': 'Vehicle parked successfully', 'slot_number': available_slot.number, 'floor': available_slot.floor.number}, status=status.HTTP_200_OK)
+            return Response({'message': f'Vehicle parked successfully with TicketID:{available_slot.floor.pa}_{available_slot.floor.number}_{available_slot.number}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'An error occured'}, status=status.HTTP_400_BAD_REQUEST)
 
