@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ParkingLotCreateView, park_vehicle
+from .views import ParkingLotCreateView, ParkVehicleView,UnparkVehicleView
 
 urlpatterns = [
     path('create-parking-lot/', ParkingLotCreateView.as_view(), name='create-parking-lot'),
