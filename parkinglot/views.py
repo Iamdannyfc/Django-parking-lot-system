@@ -126,3 +126,13 @@ class UnparkVehicleView(APIView):
         return Response(
             {"message": "Vehicle unparked successfully"}, status=status.HTTP_200_OK
         )
+
+
+class DisplayFreeCountView(APIView):
+    def get(self, request, vehicle_type):
+        
+        number= 
+        # Find free slots for the given vehicle type
+        free_slots_count = ParkingSlot.objects.filter(is_available=True, vehicle__type_=vehicle_type).count()
+        
+        return Response({'free_slots_count': free_slots_count}, status=status.HTTP_200_OK)
