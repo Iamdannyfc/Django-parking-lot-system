@@ -17,4 +17,5 @@ urlpatterns = [
         DisplayFreeCountView.as_view(),
         name="display-free-count",
     ),
+    path('free-slots/<str:vehicle_type>/', DisplayFreeSlotsView.as_view(), name='display-free-slots'),
 ]
