@@ -39,6 +39,13 @@ class ParkingLotCreateView(APIView):
 class ParkVehicleView(APIView):
     def post(self, request):
         vehicle_data = request.data
+        vehicle_type = vehicle_data.get("type_")
+        slot_free_number = None
+
+        if vehicle_type.title() == "Truck":
+            slot_free_number = [1]
+        elif vehicle_type.title() == "Bike":
+            slot_free_number = [2, 3]
 
         if not vehicle_data:
             return Response(
@@ -46,7 +53,16 @@ class ParkVehicleView(APIView):
             )
 
         # Find an available slot
-        available_slot = ParkingSlot.objects.filter(is_available=True).first()
+        if slot_free_number:
+            available_slot = ParkingSlot.objects.filter(
+                is_available=True, number__in=slot_free_number
+            ).first()
+        else:
+            available_slot = (
+                ParkingSlot.objects.filter(is_available=True)
+                .exclude(number__in=[1, 2, 3])
+                .first()
+            )
 
         if not available_slot:
             return Response(
