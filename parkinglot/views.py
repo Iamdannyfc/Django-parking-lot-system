@@ -53,29 +53,44 @@ class ParkVehicleView(APIView):
 
 
 
+
 class UnparkVehicleView(APIView):
     def post(self, request):
-        registration_number = request.data.get('registration_number')
+        ticket_id = request.data.get('ticket_id')
         
-        if not registration_number:
-            return Response({'error': 'Registration number is required'}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not ticket_id:
+            return Response({'error': 'Ticket ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Split the ticket ID
         try:
-            vehicle = Vehicle.objects.get(registration_number=registration_number)
+            parking_lot_id, floor_number, slot_number = ticket_id.split('_')
         except:
-            return Response({'error': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
-
+            return Response({'error': 'Invalid ticket ID format'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            slot = ParkingSlot.objects.get(vehicle=vehicle)
+            parking_lot = ParkingLot.objects.get(parking_lot_id=parking_lot_id)
         except:
-            return Response({'error': 'Parking slot for this vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Parking lot not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            floor = Floor.objects.get(parking_lot=parking_lot, number=floor_number)
+        except:
+            return Response({'error': 'Floor not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            slot = ParkingSlot.objects.get(floor=floor, number=slot_number)
+        except:
+            return Response({'error': 'Parking slot not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if slot.vehicle is None:
+            return Response({'error': 'No vehicle parked in this slot'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Unpark the vehicle
         slot.vehicle = None
+        slot.vehicle.delete()  
         slot.is_available = True
         slot.save()
-        vehicle.delete()
-
+        
         return Response({'message': 'Vehicle unparked successfully'}, status=status.HTTP_200_OK)
 
 
