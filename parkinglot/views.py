@@ -142,7 +142,11 @@ class DisplayFreeCountView(APIView):
                 is_available=True, number__in=slot_free_number
             ).count()
         else:
-            free_slots_count = ParkingSlot.objects.filter(is_available=True).count()
+            free_slots_count = (
+                ParkingSlot.objects.filter(is_available=True)
+                .exclude(number__in=[1, 2, 3])
+                .count()
+            )
 
         return Response(
             {"free_slots_count": free_slots_count}, status=status.HTTP_200_OK
