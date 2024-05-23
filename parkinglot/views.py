@@ -130,9 +130,19 @@ class UnparkVehicleView(APIView):
 
 class DisplayFreeCountView(APIView):
     def get(self, request, vehicle_type):
-        
-        number= 
+        if vehicle_type == "Truck":
+            slot_free_number = [0]
+        elif vehicle_type == "Bike":
+            slot_free_number = [1, 2]
+
         # Find free slots for the given vehicle type
-        free_slots_count = ParkingSlot.objects.filter(is_available=True, vehicle__type_=vehicle_type).count()
-        
-        return Response({'free_slots_count': free_slots_count}, status=status.HTTP_200_OK)
+        if slot_free_number:
+            free_slots_count = ParkingSlot.objects.filter(
+                is_available=True, nunber__in=slot_free_number
+            ).count()
+        else:
+            free_slots_count = ParkingSlot.objects.filter(is_available=True).count()
+
+        return Response(
+            {"free_slots_count": free_slots_count}, status=status.HTTP_200_OK
+        )
