@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import ParkingSlot, Vehicle, Floor
+from .models import ParkingSlot, Vehicle, Floor, ParkingLot
 from .serializers import VehicleSerializer, ParkingLotSerializer
 
 
@@ -130,9 +130,10 @@ class UnparkVehicleView(APIView):
 
 class DisplayFreeCountView(APIView):
     def get(self, request, vehicle_type):
-        if vehicle_type == "Truck":
+        slot_free_number = None
+        if vehicle_type.title() == "Truck":
             slot_free_number = [0]
-        elif vehicle_type == "Bike":
+        elif vehicle_type.title() == "Bike":
             slot_free_number = [1, 2]
 
         # Find free slots for the given vehicle type
