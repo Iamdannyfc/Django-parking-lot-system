@@ -132,14 +132,14 @@ class DisplayFreeCountView(APIView):
     def get(self, request, vehicle_type):
         slot_free_number = None
         if vehicle_type.title() == "Truck":
-            slot_free_number = [0]
+            slot_free_number = [1]
         elif vehicle_type.title() == "Bike":
-            slot_free_number = [1, 2]
+            slot_free_number = [2, 3]
 
         # Find free slots for the given vehicle type
         if slot_free_number:
             free_slots_count = ParkingSlot.objects.filter(
-                is_available=True, nunber__in=slot_free_number
+                is_available=True, number__in=slot_free_number
             ).count()
         else:
             free_slots_count = ParkingSlot.objects.filter(is_available=True).count()
