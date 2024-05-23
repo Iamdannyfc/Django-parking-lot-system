@@ -61,7 +61,7 @@ class UnparkVehicleView(APIView):
         if not ticket_id:
             return Response({'error': 'Ticket ID is required'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Parse the ticket ID
+        # Split the ticket ID
         try:
             parking_lot_id, floor_number, slot_number = ticket_id.split('_')
         except:
@@ -94,3 +94,4 @@ class UnparkVehicleView(APIView):
         return Response({'message': 'Vehicle unparked successfully'}, status=status.HTTP_200_OK)
 
 
+                            
