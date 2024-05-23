@@ -22,7 +22,7 @@ class ParkingLotCreateView(APIView):
                     ParkingSlot.objects.create(number=slot_number, is_available=True, floor=floor)
             
             return Response({'message': serializer.data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+        return Response({'error': 'An error occured, unable to vreate a parking lot'}, status=status.HTTP_400_BAD_REQUEST)     
     
     
     
@@ -61,7 +61,7 @@ class UnparkVehicleView(APIView):
         if not ticket_id:
             return Response({'error': 'Ticket ID is required'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Split the ticket ID
+        # Parse the ticket ID
         try:
             parking_lot_id, floor_number, slot_number = ticket_id.split('_')
         except:
