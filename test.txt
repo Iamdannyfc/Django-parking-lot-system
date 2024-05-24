@@ -4,3 +4,17 @@
 "max_slots" : 6
 
 }
+
+
+
+{
+"type_" : "Car",
+"registration_number" : "a",
+"color" : "red"
+
+}
+
+
+{
+"ticket_id": "aaa_2_4"
+}

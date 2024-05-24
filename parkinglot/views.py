@@ -9,7 +9,7 @@ from .serializers import VehicleSerializer, ParkingLotSerializer
 class ParkingLotCreateView(APIView):
     def post(self, request):
         serializer = ParkingLotSerializer(data=request.data)
-        # print(serializer.is_valid(), request.data)
+        print(serializer.is_valid(), request.data)
         if serializer.is_valid():
             parking_lot = serializer.save()
 
@@ -39,7 +39,8 @@ class ParkingLotCreateView(APIView):
 class ParkVehicleView(APIView):
     def post(self, request):
         vehicle_data = request.data
-        vehicle_type = vehicle_data.get("type_")
+        vehicle_type = vehicle_data.get("_type")
+        print(vehicle_type)
         slot_free_number = None
 
         if vehicle_type.title() == "Truck":
@@ -63,6 +64,7 @@ class ParkVehicleView(APIView):
                 .exclude(number__in=[1, 2, 3])
                 .first()
             )
+        print(available_slot)
 
         if not available_slot:
             return Response(
@@ -71,6 +73,7 @@ class ParkVehicleView(APIView):
             )
 
         vehicle_serializer = VehicleSerializer(data=vehicle_data)
+
         if vehicle_serializer.is_valid():
             vehicle = vehicle_serializer.save()
             available_slot.vehicle = vehicle
@@ -78,7 +81,7 @@ class ParkVehicleView(APIView):
             available_slot.save()
             return Response(
                 {
-                    "message": f"Vehicle parked successfully with TicketID:{available_slot.floor.parking_lot.parking_lot_id}_{available_slot.floor.number}_{available_slot.number}"
+                    "message": f"Vehicle parked successfully with TicketID:    {available_slot.floor.parking_lot.parking_lot_id}_{available_slot.floor.number}_{available_slot.number}"
                 },
                 status=status.HTTP_200_OK,
             )
@@ -134,8 +137,9 @@ class UnparkVehicleView(APIView):
             )
 
         # Unpark the vehicle
-        slot.vehicle = None
         slot.vehicle.delete()
+        slot.vehicle = None
+
         slot.is_available = True
         slot.save()
 
@@ -169,12 +173,6 @@ class DisplayFreeCountView(APIView):
         )
 
 
-
-
-
-
-
-
 class DisplayFreeSlotsView(APIView):
     def get(self, request, vehicle_type):
         slot_free_number = None
@@ -202,23 +200,14 @@ class DisplayFreeSlotsView(APIView):
             free_slots_list = [slot.number for slot in free_slots]
             free_slots_str_list = [str(slot) for slot in free_slots_list]
             free_slots_str = ", ".join(free_slots_str_list)
-            
-            response_data.append({
-                "floor": floor.number,
-                "free_slots": free_slots_str
-            })
 
-        #response_message = "\n".join(
+            response_data.append({"floor": floor.number, "free_slots": free_slots_str})
+
+        # response_message = "\n".join(
         #    [f"Free slots for {vehicle_type.title()} on Floor {data['floor']}: {data['free_slots']}" for data in response_data]
-        #)
+        # )
 
-        return Response(
-            {"message": response_data},
-            status=status.HTTP_200_OK
-        )
-
-
-
+        return Response({"message": response_data}, status=status.HTTP_200_OK)
 
 
 class DisplayOccupiedSlotsView(APIView):
@@ -237,7 +226,10 @@ class DisplayOccupiedSlotsView(APIView):
             # Find occupied slots for the given vehicle type on the current floor
             if slot_free_number:
                 occupied_slots = ParkingSlot.objects.filter(
-                    is_available=False, number__in=slot_free_number, floor=floor, _type=vehicle_type
+                    is_available=False,
+                    number__in=slot_free_number,
+                    floor=floor,
+                    _type=vehicle_type,
                 )
             else:
                 occupied_slots = ParkingSlot.objects.filter(
@@ -248,19 +240,13 @@ class DisplayOccupiedSlotsView(APIView):
             occupied_slots_list = [slot.number for slot in occupied_slots]
             occupied_slots_str_list = [str(slot) for slot in occupied_slots_list]
             occupied_slots_str = ", ".join(occupied_slots_str_list)
-            
-            response_data.append({
-                "floor": floor.number,
-                "occupied_slots": occupied_slots_str
-            })
 
-        #response_message = "\n".join(
-          #  [f"Occupied slots for {vehicle_type.title()} on Floor {data['floor']}: {data['occupied_slots']}" for data in response_data]
-        #)
+            response_data.append(
+                {"floor": floor.number, "occupied_slots": occupied_slots_str}
+            )
 
-        return Response(
-            {"message": response_data},
-            status=status.HTTP_200_OK
-        )
-        
-        
+        # response_message = "\n".join(
+        #  [f"Occupied slots for {vehicle_type.title()} on Floor {data['floor']}: {data['occupied_slots']}" for data in response_data]
+        # )
+
+        return Response({"message": response_data}, status=status.HTTP_200_OK)

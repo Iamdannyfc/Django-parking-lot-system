@@ -4,8 +4,8 @@ from .views import (
     ParkVehicleView,
     UnparkVehicleView,
     DisplayFreeCountView,
-DisplayOccupiedSlotsView,
-DisplayFreeSlotsView
+    DisplayOccupiedSlotsView,
+    DisplayFreeSlotsView,
 )
 
 urlpatterns = [
@@ -19,7 +19,14 @@ urlpatterns = [
         DisplayFreeCountView.as_view(),
         name="display-free-count",
     ),
-    path('free-slots/<str:vehicle_type>/', DisplayFreeSlotsView.as_view(), name='display-free-slots'),
-
-  path('occupied-slots/<str:vehicle_type>/', DisplayOccupiedSlotsView.as_view(), name='display-occupied-slots'),
+    path(
+        "free-slots/<str:vehicle_type>/",
+        DisplayFreeSlotsView.as_view(),
+        name="display-free-slots",
+    ),
+    path(
+        "occupied-slots/<str:vehicle_type>/",
+        DisplayOccupiedSlotsView.as_view(),
+        name="display-occupied-slots",
+    ),
 ]
