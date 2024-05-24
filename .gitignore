@@ -9,6 +9,7 @@ migrations
 
 # Backup files # 
 *.bak 
+text.txt
 
 # If you are using PyCharm # 
 # User-specific stuff

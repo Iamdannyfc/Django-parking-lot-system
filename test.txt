@@ -1,0 +1,6 @@
+{
+"parking_lot_id" : "bb",
+"max_floors" : 5,
+"max_slots" : 6
+
+}
