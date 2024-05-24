@@ -4,7 +4,8 @@ from .views import (
     ParkVehicleView,
     UnparkVehicleView,
     DisplayFreeCountView,
-DisplayOccupiedSlotsView
+DisplayOccupiedSlotsView,
+DisplayFreeSlotsView
 )
 
 urlpatterns = [
