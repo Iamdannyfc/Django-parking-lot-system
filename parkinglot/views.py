@@ -201,7 +201,13 @@ class DisplayFreeSlotsView(APIView):
             free_slots_str_list = [str(slot) for slot in free_slots_list]
             free_slots_str = ", ".join(free_slots_str_list)
 
-            response_data.append({"floor": floor.number, "free_slots": free_slots_str})
+            response_data.append(
+                {
+                    "floor": floor.number,
+                    "free_slots": free_slots_str,
+                    "parking_lot_id": floor.parking_lot.parking_lot_id,
+                }
+            )
 
         # response_message = "\n".join(
         #    [f"Free slots for {vehicle_type.title()} on Floor {data['floor']}: {data['free_slots']}" for data in response_data]
@@ -212,6 +218,7 @@ class DisplayFreeSlotsView(APIView):
 
 class DisplayOccupiedSlotsView(APIView):
     def get(self, request, vehicle_type):
+
         slot_free_number = None
         if vehicle_type.title() == "Truck":
             slot_free_number = [1]
@@ -219,24 +226,32 @@ class DisplayOccupiedSlotsView(APIView):
             slot_free_number = [2, 3]
 
         response_data = []
+        # find occupied vehicle ids
+        list_vehicles = Vehicle.objects.filter(_type=vehicle_type.title())
+        list_vehicle_ids = [vehicle for vehicle in list_vehicles]
+        # print(list_vehicle_ids, list_vehicles)
 
         # Iterate over all floors
         floors = Floor.objects.all()
+
         for floor in floors:
+
             # Find occupied slots for the given vehicle type on the current floor
             if slot_free_number:
                 occupied_slots = ParkingSlot.objects.filter(
                     is_available=False,
                     number__in=slot_free_number,
                     floor=floor,
-                    _type=vehicle_type,
+                    vehicle__in=list_vehicle_ids,
                 )
             else:
+
                 occupied_slots = ParkingSlot.objects.filter(
-                    is_available=False, floor=floor, _type=vehicle_type
+                    is_available=False, floor=floor, vehicle__in=list_vehicle_ids
                 ).exclude(number__in=[1, 2, 3])
 
             # Convert slot numbers to a comma-separated string
+            # print(occupied_slots)
             occupied_slots_list = [slot.number for slot in occupied_slots]
             occupied_slots_str_list = [str(slot) for slot in occupied_slots_list]
             occupied_slots_str = ", ".join(occupied_slots_str_list)

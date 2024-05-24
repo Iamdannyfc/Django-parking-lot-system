@@ -8,7 +8,7 @@
 
 
 {
-"type_" : "Car",
+"_type" : "Car",
 "registration_number" : "a",
 "color" : "red"
 
