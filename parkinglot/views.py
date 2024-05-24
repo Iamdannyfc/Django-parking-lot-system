@@ -167,3 +167,100 @@ class DisplayFreeCountView(APIView):
         return Response(
             {"free_slots_count": free_slots_count}, status=status.HTTP_200_OK
         )
+
+
+
+
+
+
+
+
+class DisplayFreeSlotsView(APIView):
+    def get(self, request, vehicle_type):
+        slot_free_number = None
+        if vehicle_type.title() == "Truck":
+            slot_free_number = [1]
+        elif vehicle_type.title() == "Bike":
+            slot_free_number = [2, 3]
+
+        response_data = []
+
+        # Iterate over all floors
+        floors = Floor.objects.all()
+        for floor in floors:
+            # Find free slots for the given vehicle type on the current floor
+            if slot_free_number:
+                free_slots = ParkingSlot.objects.filter(
+                    is_available=True, number__in=slot_free_number, floor=floor
+                )
+            else:
+                free_slots = ParkingSlot.objects.filter(
+                    is_available=True, floor=floor
+                ).exclude(number__in=[1, 2, 3])
+
+            # Convert slot numbers to a comma-separated string
+            free_slots_list = [slot.number for slot in free_slots]
+            free_slots_str_list = [str(slot) for slot in free_slots_list]
+            free_slots_str = ", ".join(free_slots_str_list)
+            
+            response_data.append({
+                "floor": floor.number,
+                "free_slots": free_slots_str
+            })
+
+        #response_message = "\n".join(
+        #    [f"Free slots for {vehicle_type.title()} on Floor {data['floor']}: {data['free_slots']}" for data in response_data]
+        #)
+
+        return Response(
+            {"message": response_data},
+            status=status.HTTP_200_OK
+        )
+
+
+
+
+
+class DisplayOccupiedSlotsView(APIView):
+    def get(self, request, vehicle_type):
+        slot_free_number = None
+        if vehicle_type.title() == "Truck":
+            slot_free_number = [1]
+        elif vehicle_type.title() == "Bike":
+            slot_free_number = [2, 3]
+
+        response_data = []
+
+        # Iterate over all floors
+        floors = Floor.objects.all()
+        for floor in floors:
+            # Find occupied slots for the given vehicle type on the current floor
+            if slot_free_number:
+                occupied_slots = ParkingSlot.objects.filter(
+                    is_available=False, number__in=slot_free_number, floor=floor, _type=vehicle_type
+                )
+            else:
+                occupied_slots = ParkingSlot.objects.filter(
+                    is_available=False, floor=floor, _type=vehicle_type
+                ).exclude(number__in=[1, 2, 3])
+
+            # Convert slot numbers to a comma-separated string
+            occupied_slots_list = [slot.number for slot in occupied_slots]
+            occupied_slots_str_list = [str(slot) for slot in occupied_slots_list]
+            occupied_slots_str = ", ".join(occupied_slots_str_list)
+            
+            response_data.append({
+                "floor": floor.number,
+                "occupied_slots": occupied_slots_str
+            })
+
+        #response_message = "\n".join(
+          #  [f"Occupied slots for {vehicle_type.title()} on Floor {data['floor']}: {data['occupied_slots']}" for data in response_data]
+        #)
+
+        return Response(
+            {"message": response_data},
+            status=status.HTTP_200_OK
+        )
+        
+        
