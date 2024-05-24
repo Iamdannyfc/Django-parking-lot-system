@@ -257,7 +257,11 @@ class DisplayOccupiedSlotsView(APIView):
             occupied_slots_str = ", ".join(occupied_slots_str_list)
 
             response_data.append(
-                {"floor": floor.number, "occupied_slots": occupied_slots_str}
+                {
+                    "floor": floor.number,
+                    "occupied_slots": occupied_slots_str,
+                    "parking_lot_id": floor.parking_lot.parking_lot_id,
+                }
             )
 
         # response_message = "\n".join(
