@@ -2,35 +2,34 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import ParkingSlot, Vehicle, Floor, ParkingLot
-from .serializers import VehicleSerializer, ParkingLotSerializer
+from .serializers import VehicleSerializer, ParkingLotSerializer, ParkingSlotSerializer
+from .services import *
 
 
 # You have to create parking
 class ParkingLotCreateView(APIView):
     def post(self, request):
         serializer = ParkingLotSerializer(data=request.data)
-        print(serializer.is_valid(), request.data)
+
         if serializer.is_valid():
             parking_lot = serializer.save()
 
-            # Create Floors and Parking Slots based on max_floors and max_slots
+            # What is the max_floors and max_slots you want
             max_floors = parking_lot.max_floors
             max_slots = parking_lot.max_slots
 
-            for floor_number in range(1, max_floors + 1):
-                floor = Floor.objects.create(
-                    number=floor_number, parking_lot=parking_lot
-                )
-                for slot_number in range(1, max_slots + 1):
-                    ParkingSlot.objects.create(
-                        number=slot_number, is_available=True, floor=floor
-                    )
+            # Create the parking lot based on max_floors and max_slots
+            parking_lot_creation_response = create_parking_lot(
+                serializer, parking_lot, max_floors, max_slots
+            )
 
             return Response(
-                {"message": serializer.data}, status=status.HTTP_201_CREATED
+                parking_lot_creation_response,
+                status=status.HTTP_201_CREATED,
             )
+
         return Response(
-            {"error": "An error occured, unable to create a parking lot"},
+            {"error": "An error occurred, unable to create a parking lot"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -40,13 +39,8 @@ class ParkVehicleView(APIView):
     def post(self, request):
         vehicle_data = request.data
         vehicle_type = vehicle_data.get("_type")
-        print(vehicle_type)
-        slot_free_number = None
-
-        if vehicle_type.title() == "Truck":
-            slot_free_number = [1]
-        elif vehicle_type.title() == "Bike":
-            slot_free_number = [2, 3]
+        # print(vehicle_type)
+        slot_free_number = slot_list_for_vehicle_type(vehicle_type)
 
         if not vehicle_data:
             return Response(
@@ -54,17 +48,8 @@ class ParkVehicleView(APIView):
             )
 
         # Find an available slot
-        if slot_free_number:
-            available_slot = ParkingSlot.objects.filter(
-                is_available=True, number__in=slot_free_number
-            ).first()
-        else:
-            available_slot = (
-                ParkingSlot.objects.filter(is_available=True)
-                .exclude(number__in=[1, 2, 3])
-                .first()
-            )
-        print(available_slot)
+        available_slot = find_available_slot(slot_free_number)
+        # print(available_slot)
 
         if not available_slot:
             return Response(
@@ -75,14 +60,11 @@ class ParkVehicleView(APIView):
         vehicle_serializer = VehicleSerializer(data=vehicle_data)
 
         if vehicle_serializer.is_valid():
-            vehicle = vehicle_serializer.save()
-            available_slot.vehicle = vehicle
-            available_slot.is_available = False
-            available_slot.save()
+            # Park the damn vehicle
+            park_vehicle_response = park_vehicle(vehicle_serializer, available_slot)
+
             return Response(
-                {
-                    "message": f"Vehicle parked successfully with TicketID:    {available_slot.floor.parking_lot.parking_lot_id}_{available_slot.floor.number}_{available_slot.number}"
-                },
+                park_vehicle_response,
                 status=status.HTTP_200_OK,
             )
         else:
@@ -101,47 +83,13 @@ class UnparkVehicleView(APIView):
             )
 
         # Split the ticket ID
-        try:
-            parking_lot_id, floor_number, slot_number = ticket_id.split("_")
-        except:
-            return Response(
-                {"error": "Invalid ticket ID format"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        slot, err = split_ticket_for_unparking(ticket_id)
 
-        try:
-            parking_lot = ParkingLot.objects.get(parking_lot_id=parking_lot_id)
-        except:
-            return Response(
-                {"error": "Parking lot not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+        if err:
+            return Response(err, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            floor = Floor.objects.get(parking_lot=parking_lot, number=floor_number)
-        except:
-            return Response(
-                {"error": "Floor not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        try:
-            slot = ParkingSlot.objects.get(floor=floor, number=slot_number)
-        except:
-            return Response(
-                {"error": "Parking slot not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if slot.vehicle is None:
-            return Response(
-                {"error": "No vehicle parked in this slot"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Unpark the vehicle
-        slot.vehicle.delete()
-        slot.vehicle = None
-
-        slot.is_available = True
-        slot.save()
+        # Unpark the vehicle in the slot
+        unpark_vehicle(slot)
 
         return Response(
             {"message": "Vehicle unparked successfully"}, status=status.HTTP_200_OK
@@ -150,23 +98,10 @@ class UnparkVehicleView(APIView):
 
 class DisplayFreeCountView(APIView):
     def get(self, request, vehicle_type):
-        slot_free_number = None
-        if vehicle_type.title() == "Truck":
-            slot_free_number = [1]
-        elif vehicle_type.title() == "Bike":
-            slot_free_number = [2, 3]
+        slot_free_number = slot_list_for_vehicle_type(vehicle_type)
 
-        # Find free slots for the given vehicle type
-        if slot_free_number:
-            free_slots_count = ParkingSlot.objects.filter(
-                is_available=True, number__in=slot_free_number
-            ).count()
-        else:
-            free_slots_count = (
-                ParkingSlot.objects.filter(is_available=True)
-                .exclude(number__in=[1, 2, 3])
-                .count()
-            )
+        # How many are they?
+        free_slots_count = find_available_slot_count(slot_free_number)
 
         return Response(
             {"free_slots_count": free_slots_count}, status=status.HTTP_200_OK
@@ -175,11 +110,8 @@ class DisplayFreeCountView(APIView):
 
 class DisplayFreeSlotsView(APIView):
     def get(self, request, vehicle_type):
-        slot_free_number = None
-        if vehicle_type.title() == "Truck":
-            slot_free_number = [1]
-        elif vehicle_type.title() == "Bike":
-            slot_free_number = [2, 3]
+
+        slot_free_number = slot_list_for_vehicle_type(vehicle_type)
 
         response_data = []
 
@@ -208,10 +140,6 @@ class DisplayFreeSlotsView(APIView):
                     "parking_lot_id": floor.parking_lot.parking_lot_id,
                 }
             )
-
-        # response_message = "\n".join(
-        #    [f"Free slots for {vehicle_type.title()} on Floor {data['floor']}: {data['free_slots']}" for data in response_data]
-        # )
 
         return Response({"message": response_data}, status=status.HTTP_200_OK)
 
