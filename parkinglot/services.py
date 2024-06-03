@@ -2,6 +2,8 @@ from .models import ParkingSlot, Vehicle, Floor, ParkingLot
 
 
 # This are just my helper funtions
+#
+#
 def slot_list_for_vehicle_type(vehicle_type):
     if vehicle_type.title() == "Truck":
         return [1]
@@ -25,21 +27,6 @@ def find_available_slot(slot_list_for_vehicle_type):
             .exclude(number__in=[1, 2, 3])
             .first()
         )
-
-
-def find_available_slot_count(slot_free_number):
-
-    if not slot_free_number == []:
-        free_slots_count = ParkingSlot.objects.filter(
-            is_available=True, number__in=slot_free_number
-        ).count()
-    else:
-        free_slots_count = (
-            ParkingSlot.objects.filter(is_available=True)
-            .exclude(number__in=[1, 2, 3])
-            .count()
-        )
-    return free_slots_count
 
 
 def split_ticket_for_unparking(ticket_id):
@@ -69,6 +56,7 @@ def split_ticket_for_unparking(ticket_id):
 
 # All my services functions
 # Are in this place
+#
 
 
 def create_parking_lot(serializer, parking_lot, max_floors, max_slots):
@@ -103,4 +91,52 @@ def unpark_vehicle(slot):
     slot.save()
 
 
-# This are for the display
+# This are for the displays
+# All display functions are here
+#
+
+
+def display_free_slots(slot_free_number):
+    response_data = []
+
+    # Iterate over all floors
+    floors = Floor.objects.all()
+    for floor in floors:
+        # Find free slots for the given vehicle type on the current floor
+        if slot_free_number:
+            free_slots = ParkingSlot.objects.filter(
+                is_available=True, number__in=slot_free_number, floor=floor
+            )
+        else:
+            free_slots = ParkingSlot.objects.filter(
+                is_available=True, floor=floor
+            ).exclude(number__in=[1, 2, 3])
+
+        # Convert slot numbers to a comma-separated string
+        free_slots_list = [slot.number for slot in free_slots]
+        free_slots_str_list = [str(slot) for slot in free_slots_list]
+        free_slots_str = ", ".join(free_slots_str_list)
+
+        response_data.append(
+            {
+                "floor": floor.number,
+                "free_slots": free_slots_str,
+                "parking_lot_id": floor.parking_lot.parking_lot_id,
+            }
+        )
+    return response_data
+
+
+def find_available_slot_count(slot_free_number):
+
+    if not slot_free_number == []:
+        free_slots_count = ParkingSlot.objects.filter(
+            is_available=True, number__in=slot_free_number
+        ).count()
+    else:
+        free_slots_count = (
+            ParkingSlot.objects.filter(is_available=True)
+            .exclude(number__in=[1, 2, 3])
+            .count()
+        )
+    return free_slots_count
