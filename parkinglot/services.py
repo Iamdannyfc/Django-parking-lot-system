@@ -117,13 +117,16 @@ def display_free_slots(slot_free_number):
         free_slots_str_list = [str(slot) for slot in free_slots_list]
         free_slots_str = ", ".join(free_slots_str_list)
 
-        response_data.append(
-            {
-                "floor": floor.number,
-                "free_slots": free_slots_str,
-                "parking_lot_id": floor.parking_lot.parking_lot_id,
-            }
-        )
+        if free_slots_str:
+            response_data.append(
+                {
+                    "floor": floor.number,
+                    "free_slots": free_slots_str,
+                    "parking_lot_id": floor.parking_lot.parking_lot_id,
+                }
+            )
+        else:
+            continue
     return response_data
 
 
