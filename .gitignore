@@ -10,6 +10,7 @@ migrations
 # Backup files # 
 *.bak 
 text.txt
+# s2.py
 
 # If you are using PyCharm # 
 # User-specific stuff
