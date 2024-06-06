@@ -57,7 +57,7 @@ class ParkVehicleView(APIView):
         # print(vehicle_type)
         slot_lists_for_vehicle_type = slot_list_for_vehicle_type(vehicle_type)
 
-        if (not vehicle_data) or (vehicle_type.title() in ALLOWED_VEHICLES):
+        if (not vehicle_data) or (not (vehicle_type.title() in ALLOWED_VEHICLES)):
             return Response({"error": "Invalid data"}, status=BAD_REQUEST)
 
         # Find an available slot
