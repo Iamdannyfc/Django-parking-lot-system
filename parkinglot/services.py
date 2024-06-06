@@ -14,7 +14,7 @@ def slot_list_for_vehicle_type(vehicle_type):
 
 
 def find_available_slot(slot_list_for_vehicle_type):
-    print(slot_list_for_vehicle_type)
+    # print(slot_list_for_vehicle_type)
     print(ParkingSlot.objects.filter(is_available=True).exclude(number__in=[1, 2, 3]))
     if not slot_list_for_vehicle_type == []:
         return ParkingSlot.objects.filter(
