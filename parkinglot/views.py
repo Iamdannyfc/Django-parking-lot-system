@@ -5,6 +5,9 @@ from .models import ParkingSlot, Vehicle, Floor, ParkingLot
 from .serializers import VehicleSerializer, ParkingLotSerializer, ParkingSlotSerializer
 from .services import *
 
+# This are vehicles you can park here
+ALLOWED_VEHICLES = ["Car", "Truck", "Bike"]
+
 # REQUEST codes
 BAD_REQUEST = status.HTTP_400_BAD_REQUEST
 CREATED_REQUEST = status.HTTP_201_CREATED
@@ -54,7 +57,7 @@ class ParkVehicleView(APIView):
         # print(vehicle_type)
         slot_lists_for_vehicle_type = slot_list_for_vehicle_type(vehicle_type)
 
-        if not vehicle_data:
+        if (not vehicle_data) or (vehicle_type.title() in ALLOWED_VEHICLES):
             return Response({"error": "Invalid data"}, status=BAD_REQUEST)
 
         # Find an available slot
