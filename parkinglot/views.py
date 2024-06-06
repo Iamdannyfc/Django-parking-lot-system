@@ -5,6 +5,12 @@ from .models import ParkingSlot, Vehicle, Floor, ParkingLot
 from .serializers import VehicleSerializer, ParkingLotSerializer, ParkingSlotSerializer
 from .services import *
 
+# REQUEST codes
+BAD_REQUEST = status.HTTP_400_BAD_REQUEST
+CREATED_REQUEST = status.HTTP_201_CREATED
+NOT_FOUND_REQUEST = status.HTTP_404_NOT_FOUND
+OK_REQUEST = status.HTTP_200_OK
+
 
 # You have to create parking
 class ParkingLotCreateView(APIView):
@@ -19,18 +25,24 @@ class ParkingLotCreateView(APIView):
             max_slots = parking_lot.max_slots
 
             # Create the parking lot based on max_floors and max_slots
-            parking_lot_creation_response = create_parking_lot(
+            parking_lot_creation_response, err = create_parking_lot(
                 serializer, parking_lot, max_floors, max_slots
             )
 
+            if err:
+                return Response(
+                    err,
+                    status=BAD_REQUEST,
+                )
+
             return Response(
                 parking_lot_creation_response,
-                status=status.HTTP_201_CREATED,
+                status=CREATED_REQUEST,
             )
 
         return Response(
             {"error": "An error occurred, unable to create a parking lot"},
-            status=status.HTTP_400_BAD_REQUEST,
+            status=BAD_REQUEST,
         )
 
 
@@ -43,34 +55,44 @@ class ParkVehicleView(APIView):
         slot_lists_for_vehicle_type = slot_list_for_vehicle_type(vehicle_type)
 
         if not vehicle_data:
-            return Response(
-                {"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Invalid data"}, status=BAD_REQUEST)
 
         # Find an available slot
-        available_slot = find_available_slot(slot_lists_for_vehicle_type)
+        available_slot, err = find_available_slot(slot_lists_for_vehicle_type)
         # print(available_slot)
+
+        if err:
+            return Response(
+                err,
+                status=NOT_FOUND_REQUEST,
+            )
 
         if not available_slot:
             return Response(
                 {"error": "No available parking slots"},
-                status=status.HTTP_404_NOT_FOUND,
+                status=NOT_FOUND_REQUEST,
             )
 
         vehicle_serializer = VehicleSerializer(data=vehicle_data)
 
         if vehicle_serializer.is_valid():
             # Park the vehicle
-            park_vehicle_response = park_vehicle(vehicle_serializer, available_slot)
+            park_vehicle_response, err = park_vehicle(
+                vehicle_serializer, available_slot
+            )
+
+            if err:
+                return Response(
+                    err,
+                    status=BAD_REQUEST,
+                )
 
             return Response(
                 park_vehicle_response,
-                status=status.HTTP_200_OK,
+                status=OK_REQUEST,
             )
         else:
-            return Response(
-                {"error": "An error occured"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "An error occured"}, status=BAD_REQUEST)
 
 
 class UnparkVehicleView(APIView):
@@ -78,22 +100,23 @@ class UnparkVehicleView(APIView):
         ticket_id = request.data.get("ticket_id")
 
         if not ticket_id:
-            return Response(
-                {"error": "Ticket ID is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "Ticket ID is required"}, status=BAD_REQUEST)
 
         # Split the ticket ID
         slot, err = split_ticket_for_unparking(ticket_id)
 
         if err:
-            return Response(err, status=status.HTTP_400_BAD_REQUEST)
+            return Response(err, status=BAD_REQUEST)
 
         # Unpark the vehicle in the slot
-        unpark_vehicle(slot)
+        unpark_response, err = unpark_vehicle(slot)
+        if err:
+            return Response(
+                err,
+                status=BAD_REQUEST,
+            )
 
-        return Response(
-            {"message": "Vehicle unparked successfully"}, status=status.HTTP_200_OK
-        )
+        return Response(unpark_response, status=OK_REQUEST)
 
 
 class DisplayFreeCountView(APIView):
@@ -101,11 +124,14 @@ class DisplayFreeCountView(APIView):
         slot_lists_for_vehicle_type = slot_list_for_vehicle_type(vehicle_type)
 
         # How many are they?
-        free_slots_count = find_available_slot_count(slot_lists_for_vehicle_type)
+        free_slots_count, err = find_available_slot_count(slot_lists_for_vehicle_type)
+        if err:
+            return Response(
+                err,
+                status=BAD_REQUEST,
+            )
 
-        return Response(
-            {"free_slots_count": free_slots_count}, status=status.HTTP_200_OK
-        )
+        return Response({"free_slots_count": free_slots_count}, status=OK_REQUEST)
 
 
 class DisplayFreeSlotsView(APIView):
@@ -113,10 +139,15 @@ class DisplayFreeSlotsView(APIView):
 
         slot_lists_for_vehicle_type = slot_list_for_vehicle_type(vehicle_type)
 
-        display_free_slots_response = display_free_slots(slot_lists_for_vehicle_type)
-        return Response(
-            {"message": display_free_slots_response}, status=status.HTTP_200_OK
+        display_free_slots_response, err = display_free_slots(
+            slot_lists_for_vehicle_type
         )
+        if err:
+            return Response(
+                err,
+                status=BAD_REQUEST,
+            )
+        return Response({"message": display_free_slots_response}, status=OK_REQUEST)
 
 
 class DisplayOccupiedSlotsView(APIView):
@@ -128,8 +159,13 @@ class DisplayOccupiedSlotsView(APIView):
         list_vehicle_ids = [vehicle for vehicle in list_vehicles]
         # print(list_vehicle_ids, list_vehicles)
 
-        response_data = display_occupied_slots(
+        response_data, err = display_occupied_slots(
             slot_lists_for_vehicle_type, list_vehicle_ids
         )
+        if err:
+            return Response(
+                err,
+                status=BAD_REQUEST,
+            )
 
-        return Response({"message": response_data}, status=status.HTTP_200_OK)
+        return Response({"message": response_data}, status=OK_REQUEST)
