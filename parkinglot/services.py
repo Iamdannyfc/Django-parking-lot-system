@@ -14,7 +14,7 @@ def slot_list_for_vehicle_type(vehicle_type):
 
 
 def find_available_slot(slot_list_for_vehicle_type):
-    print(slot_list_for_vehicle_type, 99)
+    print(slot_list_for_vehicle_type)
     print(ParkingSlot.objects.filter(is_available=True).exclude(number__in=[1, 2, 3]))
     if not slot_list_for_vehicle_type == []:
         return ParkingSlot.objects.filter(
@@ -140,3 +140,48 @@ def find_available_slot_count(slot_free_number):
             .count()
         )
     return free_slots_count
+
+
+def display_occupied_slots(slot_lists_for_vehicle_type, list_vehicle_ids):
+    response_data = []
+    # find occupied vehicle ids
+
+    # Iterate over all floors
+    floors = Floor.objects.all()
+
+    for floor in floors:
+
+        # Find occupied slots for the given vehicle type on the current floor
+        if slot_lists_for_vehicle_type:
+            occupied_slots = ParkingSlot.objects.filter(
+                is_available=False,
+                number__in=slot_lists_for_vehicle_type,
+                floor=floor,
+                vehicle__in=list_vehicle_ids,
+            )
+        else:
+
+            occupied_slots = ParkingSlot.objects.filter(
+                is_available=False, floor=floor, vehicle__in=list_vehicle_ids
+            ).exclude(number__in=[1, 2, 3])
+
+        # Convert slot numbers to a comma-separated string
+        # print(occupied_slots)
+
+        occupied_slots_list = [slot.number for slot in occupied_slots]
+
+        occupied_slots_str_list = [str(slot) for slot in occupied_slots_list]
+        occupied_slots_str = ", ".join(occupied_slots_str_list)
+
+        if occupied_slots_str:
+
+            response_data.append(
+                {
+                    "occupied_slots": occupied_slots_str,
+                    "floor": floor.number,
+                    "parking_lot_id": floor.parking_lot.parking_lot_id,
+                }
+            )
+        else:
+            continue
+    return response_data
