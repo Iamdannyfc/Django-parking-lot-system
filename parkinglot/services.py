@@ -1,4 +1,14 @@
-from .models import ParkingSlot, Vehicle, Floor, ParkingLot
+from .models import ParkingSlot, Floor, ParkingLot
+from rest_framework import status
+
+# This are vehicles you can park here
+ALLOWED_VEHICLES = ["Car", "Truck", "Bike"]
+
+# REQUEST codes
+BAD_REQUEST = status.HTTP_400_BAD_REQUEST
+CREATED_REQUEST = status.HTTP_201_CREATED
+NOT_FOUND_REQUEST = status.HTTP_404_NOT_FOUND
+OK_REQUEST = status.HTTP_200_OK
 
 
 # Helper functions
