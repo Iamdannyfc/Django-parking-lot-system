@@ -123,7 +123,8 @@ def park_vehicle(vehicle_serializer, available_slot):
         available_slot.is_available = False
         available_slot.save()
         return {
-            "message": f"Vehicle parked successfully with TicketID: {available_slot.floor.parking_lot.parking_lot_id}_{available_slot.floor.number}_{available_slot.number}"
+            "message": "Vehicle parked successfully",
+            "ticket_id": f"{available_slot.floor.parking_lot.parking_lot_id}_{available_slot.floor.number}_{available_slot.number}",
         }, None
     except:
         print(f"Error parking vehicle")

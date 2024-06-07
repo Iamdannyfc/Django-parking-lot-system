@@ -23,7 +23,7 @@ redis-cli
 
 
 {
-"ticket_id": "baaaaab_1_5"
+"ticket_id": "bb_1_5"
 }
 
 
