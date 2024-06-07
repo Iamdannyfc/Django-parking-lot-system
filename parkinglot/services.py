@@ -4,7 +4,7 @@ from rest_framework import status
 # This are vehicles you can park here
 ALLOWED_VEHICLES = ["Car", "Truck", "Bike"]
 
-# REQUEST codes
+# HTTP request codes
 BAD_REQUEST = status.HTTP_400_BAD_REQUEST
 CREATED_REQUEST = status.HTTP_201_CREATED
 NOT_FOUND_REQUEST = status.HTTP_404_NOT_FOUND
@@ -84,13 +84,19 @@ def split_ticket_for_unparking(ticket_id):
 
 
 # Service functions
-# These functions handle the core logic of creating, parking, and unparking operations
+# These functions handles creating, parking, and unparking operations
 
 
-def create_parking_lot(serializer, parking_lot, max_floors, max_slots):
+def create_parking_lot(serializer):
     """
     Create floors and parking slots for the given parking lot.
     """
+    parking_lot = serializer.save()
+
+    # What is the max_floors and max_slots you want
+    max_floors = parking_lot.max_floors
+    max_slots = parking_lot.max_slots
+
     try:
         for floor_number in range(1, max_floors + 1):
             floor = Floor.objects.create(number=floor_number, parking_lot=parking_lot)
@@ -103,7 +109,7 @@ def create_parking_lot(serializer, parking_lot, max_floors, max_slots):
             "data": serializer.data,
         }, None
     except:
-        print(f"Error creating parking lot")
+        # print(f"Error creating parking lot")
         return None, {"error": "An error occurred while creating the parking lot"}
 
 
@@ -140,7 +146,7 @@ def unpark_vehicle(slot):
 
 
 # Display functions
-# These functions handle the logic for displaying information about free and occupied slots
+# These functions handle the display of free and occupied slots
 
 
 def display_free_slots(slot_free_number):
@@ -239,7 +245,7 @@ def display_occupied_slots(slot_lists_for_vehicle_type, list_vehicle_ids):
                     }
                 )
     except:
-        print(f"Error displaying occupied slots")
+        # print(f"Error displaying occupied slots")
         return None, {"error": "An error occurred while displaying occupied slots"}
 
     return response_data, None

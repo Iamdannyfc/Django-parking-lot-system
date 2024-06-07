@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import ParkingSlot, Vehicle, Floor, ParkingLot
-from .serializers import VehicleSerializer, ParkingLotSerializer, ParkingSlotSerializer
+from .models import Vehicle
+from .serializers import VehicleSerializer, ParkingLotSerializer
 from .services import *
 
 
@@ -11,16 +11,9 @@ class ParkingLotCreateView(APIView):
         serializer = ParkingLotSerializer(data=request.data)
 
         if serializer.is_valid():
-            parking_lot = serializer.save()
-
-            # What is the max_floors and max_slots you want
-            max_floors = parking_lot.max_floors
-            max_slots = parking_lot.max_slots
 
             # Create the parking lot based on max_floors and max_slots
-            parking_lot_creation_response, err = create_parking_lot(
-                serializer, parking_lot, max_floors, max_slots
-            )
+            parking_lot_creation_response, err = create_parking_lot(serializer)
 
             if err:
                 return Response(
@@ -42,6 +35,7 @@ class ParkingLotCreateView(APIView):
 # wait, lemme work on parking
 class ParkVehicleView(APIView):
     def post(self, request):
+        # The vehicle is
         vehicle_data = request.data
         vehicle_type = vehicle_data.get("_type")
         # print(vehicle_type)
