@@ -16,7 +16,7 @@ Create a django api app for the parking lot system with the following requiremen
 - Track vehicles parked in each slot.
 - This Django project was an upgrade of the python application described [here](https://workat.tech/machine-coding/practice/design-parking-lot-qm6hwq4wkhp8), it is an upgrade asked to be done at The Internship using Django app and drf.
 
-  ## Postman
+## Postman
   View the postman documentation [here](https://documenter.getpostman.com/view/35136797/2sA3QqfsSv)
 
 ## UML Diagrams
